@@ -60,6 +60,9 @@ class BillDataManager:
                 self.df = pd.merge(master_df, combined_billing, on='ID', how='left', suffixes=('', '_billing'))
                 if 'Nama_billing' in self.df.columns:
                     self.df.drop(columns=['Nama_billing'], inplace=True)
+                
+                self.df = self.df[self.df['Source_Village'].notna()].copy()
+                
                 self.month_columns = get_month_columns(self.df)
             else:
                 self.df = master_df

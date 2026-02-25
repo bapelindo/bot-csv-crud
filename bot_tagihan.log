@@ -5006,3 +5006,136 @@ telegram.error.NetworkError: httpx.ReadError:
 2026-02-25 14:12:07,878 - src.handlers - INFO - Checking unpaid for: FEB'26
 2026-02-25 14:12:09,977 - src.handlers - INFO - Melihat daftar semua client
 2026-02-25 14:12:16,723 - src.handlers - INFO - Checking paid for: FEB'26
+2026-02-25 14:55:19,549 - src.handlers - INFO - Checking unpaid for: FEB'26
+2026-02-25 14:55:39,070 - src.handlers - INFO - Checking unpaid for: FEB'26
+2026-02-25 14:55:57,274 - src.handlers - INFO - Text search for: Hartini
+2026-02-25 14:56:21,925 - src.handlers - INFO - Melihat daftar semua client
+2026-02-25 14:56:33,791 - src.handlers - INFO - Checking paid for: FEB'26
+2026-02-25 14:57:07,560 - src.handlers - INFO - Melihat daftar semua client
+2026-02-25 16:27:08,026 - __main__ - INFO - ==================================================
+2026-02-25 16:27:08,027 - __main__ - INFO - Telegram Bot Pembayaran Tagihan
+2026-02-25 16:27:08,027 - __main__ - INFO - ==================================================
+2026-02-25 16:27:08,027 - __main__ - INFO - Loading master data: E:\bahrulhuda\data\master.csv
+2026-02-25 16:27:08,028 - __main__ - INFO - Loading billing dir: E:\bahrulhuda\data\billing
+2026-02-25 16:27:08,068 - src.data_loader - INFO - Berhasil load 50 baris data (Header at line 0)
+2026-02-25 16:27:08,069 - src.data_loader - INFO - Loaded billing for gondanglegi: 50 rows
+2026-02-25 16:27:08,086 - src.data_manager - INFO - Data unified: 161 rows, 23 months
+2026-02-25 16:27:08,105 - __main__ - INFO - Data loaded: 161 warga, 23 bulan
+2026-02-25 16:27:08,106 - __main__ - INFO - Starting file watcher on: E:\bahrulhuda\data
+2026-02-25 16:27:08,109 - src.file_watcher - INFO - Memulai monitoring directory: E:\bahrulhuda\data
+2026-02-25 16:27:08,109 - __main__ - INFO - Creating Telegram application...
+2026-02-25 16:27:09,438 - __main__ - INFO - All handlers registered successfully
+2026-02-25 16:27:09,438 - __main__ - INFO - Starting bot polling...
+2026-02-25 16:27:09,438 - __main__ - INFO - Bot is ready! Press Ctrl+C to stop.
+2026-02-25 16:27:10,739 - __main__ - INFO - Bot initialized successfully and commands menu set!
+2026-02-25 16:27:19,432 - src.handlers - INFO - Melihat daftar semua client
+2026-02-25 16:29:03,179 - __main__ - INFO - Shutting down bot...
+2026-02-25 16:29:03,180 - src.file_watcher - INFO - File watcher dihentikan
+2026-02-25 16:29:03,181 - __main__ - INFO - Bot stopped.
+2026-02-25 16:29:07,560 - __main__ - INFO - ==================================================
+2026-02-25 16:29:07,561 - __main__ - INFO - Telegram Bot Pembayaran Tagihan
+2026-02-25 16:29:07,561 - __main__ - INFO - ==================================================
+2026-02-25 16:29:07,561 - __main__ - INFO - Loading master data: E:\bahrulhuda\data\master.csv
+2026-02-25 16:29:07,562 - __main__ - INFO - Loading billing dir: E:\bahrulhuda\data\billing
+2026-02-25 16:29:07,587 - src.data_loader - INFO - Berhasil load 50 baris data (Header at line 0)
+2026-02-25 16:29:07,590 - src.data_loader - INFO - Loaded billing for gondanglegi: 50 rows
+2026-02-25 16:29:07,599 - src.data_manager - INFO - Data unified: 161 rows, 23 months
+2026-02-25 16:29:07,622 - __main__ - INFO - Data loaded: 161 warga, 23 bulan
+2026-02-25 16:29:07,623 - __main__ - INFO - Starting file watcher on: E:\bahrulhuda\data
+2026-02-25 16:29:07,626 - src.file_watcher - INFO - Memulai monitoring directory: E:\bahrulhuda\data
+2026-02-25 16:29:07,626 - __main__ - INFO - Creating Telegram application...
+2026-02-25 16:29:08,817 - __main__ - INFO - All handlers registered successfully
+2026-02-25 16:29:08,818 - __main__ - INFO - Starting bot polling...
+2026-02-25 16:29:08,818 - __main__ - INFO - Bot is ready! Press Ctrl+C to stop.
+2026-02-25 16:29:10,447 - __main__ - INFO - Bot initialized successfully and commands menu set!
+2026-02-25 16:29:13,219 - src.handlers - INFO - Melihat daftar semua client
+2026-02-25 16:30:04,585 - src.handlers - INFO - Checking unpaid for: FEB'26
+2026-02-25 16:32:21,849 - src.file_watcher - INFO - File CSV berubah, menjalankan reload...
+2026-02-25 16:32:21,850 - src.data_manager - INFO - Reloading data (sync)...
+2026-02-25 16:32:21,873 - src.data_loader - INFO - Berhasil load 50 baris data (Header at line 0)
+2026-02-25 16:32:21,873 - src.data_loader - INFO - Loaded billing for gondanglegi: 50 rows
+2026-02-25 16:32:21,878 - src.data_manager - INFO - Data unified: 50 rows, 23 months
+2026-02-25 16:32:21,879 - __main__ - INFO - Data reloaded successfully
+2026-02-25 16:32:29,627 - __main__ - INFO - Received keyboard interrupt
+2026-02-25 16:32:29,628 - __main__ - INFO - Shutting down bot...
+2026-02-25 16:32:29,629 - src.file_watcher - INFO - File watcher dihentikan
+2026-02-25 16:32:29,629 - __main__ - INFO - Bot stopped.
+2026-02-25 16:32:33,459 - __main__ - INFO - ==================================================
+2026-02-25 16:32:33,459 - __main__ - INFO - Telegram Bot Pembayaran Tagihan
+2026-02-25 16:32:33,460 - __main__ - INFO - ==================================================
+2026-02-25 16:32:33,460 - __main__ - INFO - Loading master data: E:\bahrulhuda\data\master.csv
+2026-02-25 16:32:33,461 - __main__ - INFO - Loading billing dir: E:\bahrulhuda\data\billing
+2026-02-25 16:32:33,489 - src.data_loader - INFO - Berhasil load 50 baris data (Header at line 0)
+2026-02-25 16:32:33,489 - src.data_loader - INFO - Loaded billing for gondanglegi: 50 rows
+2026-02-25 16:32:33,499 - src.data_manager - INFO - Data unified: 50 rows, 23 months
+2026-02-25 16:32:33,507 - __main__ - INFO - Data loaded: 50 warga, 23 bulan
+2026-02-25 16:32:33,507 - __main__ - INFO - Starting file watcher on: E:\bahrulhuda\data
+2026-02-25 16:32:33,511 - src.file_watcher - INFO - Memulai monitoring directory: E:\bahrulhuda\data
+2026-02-25 16:32:33,511 - __main__ - INFO - Creating Telegram application...
+2026-02-25 16:32:34,172 - __main__ - INFO - ==================================================
+2026-02-25 16:32:34,173 - __main__ - INFO - Telegram Bot Pembayaran Tagihan
+2026-02-25 16:32:34,173 - __main__ - INFO - ==================================================
+2026-02-25 16:32:34,173 - __main__ - INFO - Loading master data: E:\bahrulhuda\data\master.csv
+2026-02-25 16:32:34,174 - __main__ - INFO - Loading billing dir: E:\bahrulhuda\data\billing
+2026-02-25 16:32:34,201 - src.data_loader - INFO - Berhasil load 50 baris data (Header at line 0)
+2026-02-25 16:32:34,201 - src.data_loader - INFO - Loaded billing for gondanglegi: 50 rows
+2026-02-25 16:32:34,208 - src.data_manager - INFO - Data unified: 50 rows, 23 months
+2026-02-25 16:32:34,216 - __main__ - INFO - Data loaded: 50 warga, 23 bulan
+2026-02-25 16:32:34,217 - __main__ - INFO - Starting file watcher on: E:\bahrulhuda\data
+2026-02-25 16:32:34,221 - src.file_watcher - INFO - Memulai monitoring directory: E:\bahrulhuda\data
+2026-02-25 16:32:34,221 - __main__ - INFO - Creating Telegram application...
+2026-02-25 16:32:34,761 - __main__ - INFO - All handlers registered successfully
+2026-02-25 16:32:34,761 - __main__ - INFO - Starting bot polling...
+2026-02-25 16:32:34,762 - __main__ - INFO - Bot is ready! Press Ctrl+C to stop.
+2026-02-25 16:32:35,434 - __main__ - INFO - All handlers registered successfully
+2026-02-25 16:32:35,435 - __main__ - INFO - Starting bot polling...
+2026-02-25 16:32:35,436 - __main__ - INFO - Bot is ready! Press Ctrl+C to stop.
+2026-02-25 16:32:35,779 - __main__ - INFO - Bot initialized successfully and commands menu set!
+2026-02-25 16:32:36,502 - __main__ - INFO - Bot initialized successfully and commands menu set!
+2026-02-25 16:32:36,830 - src.handlers - INFO - Checking paid for: FEB'26
+2026-02-25 16:32:37,276 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:32:41,594 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:32:42,708 - src.handlers - INFO - Checking unpaid for: FEB'26
+2026-02-25 16:32:43,343 - src.handlers - INFO - Checking unpaid for: FEB'26
+2026-02-25 16:32:43,545 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:32:47,757 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:32:49,571 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:32:50,847 - src.handlers - INFO - Melihat daftar semua client
+2026-02-25 16:32:53,785 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:32:55,001 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:32:59,214 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:00,919 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:05,624 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:08,125 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:13,585 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:18,159 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:22,218 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:29,218 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:34,953 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:46,115 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:33:59,119 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:34:03,326 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:34:22,008 - __main__ - INFO - Shutting down bot...
+2026-02-25 16:34:22,009 - src.file_watcher - INFO - File watcher dihentikan
+2026-02-25 16:34:22,010 - __main__ - INFO - Bot stopped.
+2026-02-25 16:40:23,659 - __main__ - INFO - ==================================================
+2026-02-25 16:40:23,659 - __main__ - INFO - Telegram Bot Pembayaran Tagihan
+2026-02-25 16:40:23,660 - __main__ - INFO - ==================================================
+2026-02-25 16:40:23,660 - __main__ - INFO - Loading master data: E:\bahrulhuda\data\master.csv
+2026-02-25 16:40:23,660 - __main__ - INFO - Loading billing dir: E:\bahrulhuda\data\billing
+2026-02-25 16:40:23,683 - src.data_loader - INFO - Berhasil load 50 baris data (Header at line 0)
+2026-02-25 16:40:23,683 - src.data_loader - INFO - Loaded billing for gondanglegi: 50 rows
+2026-02-25 16:40:23,693 - src.data_manager - INFO - Data unified: 50 rows, 23 months
+2026-02-25 16:40:23,701 - __main__ - INFO - Data loaded: 50 warga, 23 bulan
+2026-02-25 16:40:23,702 - __main__ - INFO - Starting file watcher on: E:\bahrulhuda\data
+2026-02-25 16:40:23,707 - src.file_watcher - INFO - Memulai monitoring directory: E:\bahrulhuda\data
+2026-02-25 16:40:23,708 - __main__ - INFO - Creating Telegram application...
+2026-02-25 16:40:24,899 - __main__ - INFO - All handlers registered successfully
+2026-02-25 16:40:24,899 - __main__ - INFO - Starting bot polling...
+2026-02-25 16:40:24,900 - __main__ - INFO - Bot is ready! Press Ctrl+C to stop.
+2026-02-25 16:40:27,430 - src.handlers - INFO - Melihat daftar semua client
+2026-02-25 16:40:31,303 - __main__ - INFO - Bot initialized successfully and commands menu set!
+2026-02-25 16:40:32,428 - src.handlers - ERROR - Update None caused error Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2026-02-25 16:40:34,102 - __main__ - INFO - Shutting down bot...
+2026-02-25 16:40:34,103 - src.file_watcher - INFO - File watcher dihentikan
+2026-02-25 16:40:34,103 - __main__ - INFO - Bot stopped.
