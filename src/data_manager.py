@@ -133,6 +133,16 @@ class BillDataManager:
                 return matches[-1]
         return None
 
+    async def get_all_clients(self) -> List[Dict[str, Any]]:
+        """Mengambil data semua client dari master/df"""
+        return await asyncio.to_thread(self._sync_locked_call, self._get_all_clients_sync)
+
+    def _get_all_clients_sync(self) -> List[Dict[str, Any]]:
+        if self.df.empty: return []
+        # Sort by Name
+        res = self.df.sort_values(by='Nama', na_position='last').copy()
+        return self._format_results(res)
+
     async def search_by_name(self, name: str) -> List[Dict[str, Any]]:
         return await asyncio.to_thread(self._sync_locked_call, self._search_by_name_sync, name)
 

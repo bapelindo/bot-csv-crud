@@ -2,6 +2,7 @@
 Telegram Bot Command Handlers
 """
 import logging
+import asyncio
 from typing import Optional
 
 from pathlib import Path
@@ -15,11 +16,11 @@ from .formatters import (
     format_bill_status,
     format_unpaid_list,
     format_paid_list,
-    format_multiple_results,
     format_help_message,
     format_error_message,
     format_stats_message,
-    format_currency
+    format_currency,
+    format_client_list
 )
 from .data_loader import parse_nominal
 from telegram.ext import ConversationHandler
@@ -63,6 +64,7 @@ class BotHandlers:
             keyboard = [
                 [KeyboardButton("🔍 Cek Tagihan"), KeyboardButton("📅 Belum Bayar")],
                 [KeyboardButton("✅ Paid"), KeyboardButton("📊 Statistik")],
+                [KeyboardButton("👥 Daftar Client")],
                 [KeyboardButton("❓ Bantuan")]
             ]
             reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -137,6 +139,39 @@ class BotHandlers:
                 "❌ Terjadi kesalahan saat mengambil statistik."
             )
 
+    async def _show_multiple_results_keyboard(self, update: Update, search_results: List[Dict[str, Any]]):
+        """
+        Tampilkan hasil pencarian yang banyak menggunakan inline keyboard bertahap (chunking).
+        """
+        chunk_size = 20 # Batasi jumlah tombol per pesan agar tidak terlalu panjang
+        total_parts = (len(search_results) + chunk_size - 1) // chunk_size
+
+        tasks = []
+        for part, i in enumerate(range(0, len(search_results), chunk_size), 1):
+            chunk = search_results[i:i + chunk_size]
+            keyboard = []
+            
+            for person in chunk:
+                label = f"{person['Nama']}"
+                if person.get('Alamat'):
+                    label += f" ({person['Alamat']})"
+                keyboard.append([InlineKeyboardButton(label, callback_data=f"view_res_{person['No']}")])
+            
+            text = f"🔎 *Ditemukan {len(search_results)} warga*"
+            if total_parts > 1:
+                text += f" (Bagian {part}/{total_parts})"
+            text += ", silakan pilih:"
+
+            if update.effective_message:
+                tasks.append(update.effective_message.reply_text(
+                    text,
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                    parse_mode='Markdown'
+                ))
+                
+        if tasks:
+            await asyncio.gather(*tasks)
+
     async def cek_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """
         Handler untuk command /cek <nama>
@@ -178,21 +213,9 @@ class BotHandlers:
                     )
                 return
 
-            # Jika multiple results, tampilkan list dulu
+            # Jika multiple results, tampilkan list dulu chunked
             if len(search_results) > 1:
-                keyboard = []
-                for person in search_results[:10]:
-                    label = f"{person['Nama']}"
-                    if person.get('Alamat'):
-                        label += f" ({person['Alamat']})"
-                    keyboard.append([InlineKeyboardButton(label, callback_data=f"view_res_{person['No']}")])
-                
-                if update.effective_message:
-                    await update.effective_message.reply_text(
-                        f"🔎 *Ditemukan {len(search_results)} warga, silakan pilih:*",
-                        reply_markup=InlineKeyboardMarkup(keyboard),
-                        parse_mode='Markdown'
-                    )
+                await self._show_multiple_results_keyboard(update, search_results)
                 return
 
             # Single result
@@ -268,6 +291,10 @@ class BotHandlers:
                 # Redirect to stats command
                 await self.stats_command(update, context)
                 return
+            elif search_term == "👥 Daftar Client":
+                # Redirect to client list command
+                await self.client_list_command(update, context)
+                return
             elif search_term == "❓ Bantuan":
                 available_months = await self.data_manager.get_available_months()
                 message = format_help_message(available_months)
@@ -288,22 +315,9 @@ class BotHandlers:
                     )
                 return
 
-            # Jika multiple results, tampilkan list dulu
+            # Jika multiple results, tampilkan list dulu chunked
             if len(search_results) > 1:
-                keyboard = []
-                for person in search_results[:MAX_SEARCH_BUTTONS]:
-                    label = f"{person['Nama']}"
-                    if person.get('Alamat'):
-                        label += f" ({person['Alamat']})"
-                    # person['No'] here is OK because search_results are formatted dicts that have 'No' mapped from 'ID'
-                    keyboard.append([InlineKeyboardButton(label, callback_data=f"view_res_{person['No']}")])
-                
-                if update.effective_message:
-                    await update.effective_message.reply_text(
-                        f"🔎 *Ditemukan {len(search_results)} warga, silakan pilih:*",
-                        reply_markup=InlineKeyboardMarkup(keyboard),
-                        parse_mode='Markdown'
-                    )
+                await self._show_multiple_results_keyboard(update, search_results)
                 return
 
             # Single result
@@ -363,14 +377,30 @@ class BotHandlers:
                     )
                 return
 
-            message = format_unpaid_list(unpaid_list, month_display, max_display=MAX_UNPAID_LIST)
-            
-            # Split or truncate message if too long
-            if len(message) > 4000:
-                message = message[:3900] + "...\n\n(Daftar terpotong karena terlalu panjang)"
-            
-            if update.effective_message:
-                await update.effective_message.reply_text(message, parse_mode='Markdown')
+            chunk_size = 50
+            total_parts = (len(unpaid_list) + chunk_size - 1) // chunk_size
+            total_nominal = sum(person['Nominal'] for person in unpaid_list)
+
+            # Send chunks concurrently to avoid UX lag
+            tasks = []
+            for part, i in enumerate(range(0, len(unpaid_list), chunk_size), 1):
+                chunk = unpaid_list[i:i + chunk_size]
+                message = format_unpaid_list(
+                    chunk=chunk,
+                    month=month_display,
+                    total_people=len(unpaid_list),
+                    total_nominal=total_nominal,
+                    start_idx=i + 1,
+                    part=part,
+                    total_parts=total_parts
+                )
+
+                if update.effective_message:
+                    # Append coroutine instead of awaited result
+                    tasks.append(update.effective_message.reply_text(message, parse_mode='Markdown'))
+                    
+            if tasks:
+                await asyncio.gather(*tasks)
 
         except Exception as e:
             logger.error(f"Error di tagihan_command: {e}")
@@ -407,20 +437,83 @@ class BotHandlers:
             # Get paid list
             paid_list = await self.data_manager.get_paid_by_month(month_column)
 
-            message = format_paid_list(paid_list, month_display, max_display=MAX_PAID_LIST)
-            
-            # Split or truncate message if too long
-            if len(message) > 4000:
-                message = message[:3900] + "...\n\n(Daftar terpotong karena terlalu panjang)"
-            
-            if update.effective_message:
-                await update.effective_message.reply_text(message, parse_mode='Markdown')
+            if not paid_list:
+                if update.effective_message:
+                    await update.effective_message.reply_text(
+                        f"😕 Belum ada data orang yang membayar untuk bulan *{month_display}*.",
+                        parse_mode='Markdown'
+                    )
+                return
+
+            chunk_size = 50
+            total_parts = (len(paid_list) + chunk_size - 1) // chunk_size
+            total_nominal = sum(person['Nominal'] for person in paid_list)
+
+            tasks = []
+            for part, i in enumerate(range(0, len(paid_list), chunk_size), 1):
+                chunk = paid_list[i:i + chunk_size]
+                message = format_paid_list(
+                    chunk=chunk,
+                    month=month_display,
+                    total_people=len(paid_list),
+                    total_nominal=total_nominal,
+                    start_idx=i + 1,
+                    part=part,
+                    total_parts=total_parts
+                )
+
+                if update.effective_message:
+                    tasks.append(update.effective_message.reply_text(message, parse_mode='Markdown'))
+                    
+            if tasks:
+                await asyncio.gather(*tasks)
 
         except Exception as e:
             logger.error(f"Error di paid_command: {e}", exc_info=True)
             if update.effective_message:
                 await update.effective_message.reply_text(
                     "❌ Terjadi kesalahan saat mengambil data pembayaran."
+                )
+
+    async def client_list_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Handler untuk command /clients (Daftar Client)
+        Menampilkan master data semua klien.
+        """
+        try:
+            logger.info("Melihat daftar semua client")
+            clients = await self.data_manager.get_all_clients()
+            
+            if not clients:
+                if update.effective_message:
+                    await update.effective_message.reply_text("❌ Data client kosong atau belum diload.")
+                return
+
+            chunk_size = 50
+            total_parts = (len(clients) + chunk_size - 1) // chunk_size
+            
+            tasks = []
+            for part, i in enumerate(range(0, len(clients), chunk_size), 1):
+                chunk = clients[i:i + chunk_size]
+                message = format_client_list(
+                    chunk=chunk,
+                    start_idx=i + 1,
+                    total_clients=len(clients),
+                    part=part,
+                    total_parts=total_parts
+                )
+                
+                if update.effective_message:
+                    tasks.append(update.effective_message.reply_text(message, parse_mode='Markdown'))
+                    
+            if tasks:
+                await asyncio.gather(*tasks)
+                
+        except Exception as e:
+            logger.error(f"Error di client_list_command: {e}", exc_info=True)
+            if update.effective_message:
+                await update.effective_message.reply_text(
+                    "❌ Terjadi kesalahan saat mengambil data client."
                 )
 
     async def reload_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):

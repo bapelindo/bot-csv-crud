@@ -19,22 +19,39 @@ TABLE_BOX_SINGLE = {
 }
 
 
-def format_currency(value: int) -> str:
+def format_currency(value: Any) -> str:
     """
     Format integer ke format mata uang (konfigurasi di config.py)
     """
     from config import CURRENCY_SYMBOL, CURRENCY_THOUSAND_SEP
     try:
+        # Pengecekan tipe dan cast ke int
+        if isinstance(value, str):
+            value = float(value.replace('Rp', '').replace(',', '').strip())
+
+        value = int(float(value))
+
         # Format dengan separator ribuan sesuai config
-        formatted = f"{value:,}".replace(',', 'TEMP').replace('.', 'TEMP2')
-        formatted = formatted.replace('TEMP', CURRENCY_THOUSAND_SEP).replace('TEMP2', CURRENCY_THOUSAND_SEP)
-        
-        # Sederhana saja kalau cuma butuh pemisah ribuan
         formatted = f"{value:,}".replace(',', CURRENCY_THOUSAND_SEP)
         
         return f"{CURRENCY_SYMBOL} {formatted}"
     except (TypeError, ValueError):
         return f"{CURRENCY_SYMBOL} 0"
+
+
+def escape_markdown(text: str) -> str:
+    """
+    Escapes characters that could break Telegram's Markdown parsing.
+    """
+    if not text:
+        return ""
+    # Characters that need escaping in standard Markdown
+    chars_to_escape = ['_', '*', '`', '[']
+    escaped_text = str(text)
+    for char in chars_to_escape:
+        escaped_text = escaped_text.replace(char, f"\\{char}")
+    return escaped_text
+
 
 
 def format_bill_status(status: Dict[str, Any], month_columns: List[str], deadline_info: Dict[str, Any] = None) -> str:
@@ -149,7 +166,7 @@ def format_payment_table(status: Dict[str, Any], month_columns: List[str], deadl
 
     # Group months into rows (3 months per row optimized for mobile)
     months_per_row = 3
-    col_width = 10
+    col_width = 8
     table_lines = []
 
     for i in range(0, len(month_columns), months_per_row):
@@ -210,52 +227,46 @@ def format_payment_table(status: Dict[str, Any], month_columns: List[str], deadl
     return result
 
 
-def format_unpaid_list(people: List[Dict[str, Any]], month: str, max_display: int = 100) -> str:
+def format_unpaid_list(chunk: List[Dict[str, Any]], month: str, total_people: int, total_nominal: int, start_idx: int, part: int, total_parts: int) -> str:
     """
-    Format output untuk command /tagihan dalam bentuk tabel
-
-    Args:
-        people: List orang yang belum bayar
-        month: Nama bulan (format Indonesia: "Januari 2026")
-        max_display: Maksimal orang yang ditampilkan
-
-    Returns:
-        str: Pesan yang sudah diformat dalam tabel
+    Format output untuk command /tagihan dalam bentuk tabel tersplit
     """
-    if not people:
+    if not chunk and part == 1:
         return f"✅ Semua orang sudah membayar untuk bulan *{month}*!"
 
-    total_nominal = sum(person['Nominal'] for person in people)
-
     lines = [
-        f"📊 *Belum Bayar - {month}*",
-        f"👥 *Total:* {len(people)} orang",
+        f"📊 *Belum Bayar - {month}* (Bagian {part}/{total_parts})",
+        f"👥 *Total:* {total_people} orang",
         "",
     ]
 
     # Create table
-    display_people = people[:max_display]
-    table = format_unpaid_table(display_people)
-
+    table = format_unpaid_table(chunk, start_idx=start_idx)
     lines.append(table)
 
-    if len(people) > max_display:
-        lines.append(f"\n... dan {len(people) - max_display} orang lainnya")
-
     # Total nominal
-    lines.append("")
-    lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    lines.append(f"💵 *Total Tertunda:* {format_currency(total_nominal)}")
+    if part == total_parts:
+        lines.append("")
+        lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        lines.append(f"💵 *Total Tertunda:* {format_currency(total_nominal)}")
 
     return "\n".join(lines)
 
 
-def format_unpaid_table(people: List[Dict[str, Any]]) -> str:
+def get_short_address(alamat: str) -> str:
+    alamat_lower = str(alamat).lower()
+    if 'putat' in alamat_lower: return 'PUT'
+    if 'segaran' in alamat_lower: return 'SGR'
+    if 'gondang' in alamat_lower: return 'GDL'
+    return str(alamat)[:3].upper()
+
+def format_unpaid_table(people: List[Dict[str, Any]], start_idx: int = 1) -> str:
     """
-    Format list orang yang belum bayar dalam bentuk tabel yang rapi
+    Format list orang yang belum bayar dalam bentuk tabel grid
 
     Args:
         people: List orang
+        start_idx: Indeks awal
 
     Returns:
         str: Tabel dalam format monospace
@@ -263,25 +274,20 @@ def format_unpaid_table(people: List[Dict[str, Any]]) -> str:
     if not people:
         return "```Tidak ada data```"
 
-    # Calculate column widths
-    max_no = max(2, len(str(len(people))))
+    for p in people:
+        p['_alamat_sm'] = get_short_address(p.get('Alamat', '-'))
+
+    max_no = max(2, len(str(start_idx + len(people) - 1)))
     max_nama = max(4, max(len(p['Nama']) for p in people))
-    max_alamat = max(6, max(len(p.get('Alamat', '-')) for p in people))
+    max_alamat = max(6, max(len(p['_alamat_sm']) for p in people))
     max_nominal = max(7, max(len(format_currency(p['Nominal'])) for p in people))
 
-    # Padding untuk spacing
     padding = 2
-
-    # Total width calculation
     total_width = max_no + max_nama + max_alamat + max_nominal + (padding * 6)
 
-    # Create table lines
     lines = []
-
-    # Top border
     lines.append("┌" + "─" * (total_width - 2) + "┐")
 
-    # Header row
     header = (
         "│ " +
         f"{'No':^{max_no}}" + " │ " +
@@ -291,7 +297,6 @@ def format_unpaid_table(people: List[Dict[str, Any]]) -> str:
     )
     lines.append(header)
 
-    # Separator after header
     sep = (
         "│ " +
         "─" * max_no + " ┼ " +
@@ -301,10 +306,11 @@ def format_unpaid_table(people: List[Dict[str, Any]]) -> str:
     )
     lines.append(sep)
 
-    # Data rows
-    for i, person in enumerate(people, 1):
-        nama = person['Nama'][:max_nama]
-        alamat = person.get('Alamat', '-')[:max_alamat]
+    for i, person in enumerate(people, start_idx):
+        # Escape markdown characters to prevent Telegram parse errors inside the table
+        nama_raw = escape_markdown(person['Nama'])
+        nama = nama_raw[:max_nama]
+        alamat = person['_alamat_sm'][:max_alamat]
         nominal = format_currency(person['Nominal'])
 
         row = (
@@ -316,70 +322,53 @@ def format_unpaid_table(people: List[Dict[str, Any]]) -> str:
         )
         lines.append(row)
 
-    # Bottom border
     lines.append("└" + "─" * (total_width - 2) + "┘")
-
     return "```\n" + "\n".join(lines) + "\n```"
 
 
-def format_paid_list(people: List[Dict[str, Any]], month: str, max_display: int =100) -> str:
+def format_paid_list(chunk: List[Dict[str, Any]], month: str, total_people: int, total_nominal: int, start_idx: int, part: int, total_parts: int) -> str:
     """
     Format output untuk list warga yang sudah bayar dalam bentuk tabel
-
-    Args:
-        people: List orang yang sudah bayar
-        month: Nama bulan
-        max_display: Maksimal orang yang ditampilkan
-
-    Returns:
-        str: Pesan yang sudah diformat
     """
-    if not people:
+    if not chunk and part == 1:
         return f"😕 Belum ada data orang yang membayar untuk bulan *{month}*."
 
-    total_nominal = sum(person['Nominal'] for person in people)
-
     lines = [
-        f"✅ *Sudah Bayar - {month}*",
-        f"👥 *Total:* {len(people)} orang",
+        f"✅ *Sudah Bayar - {month}* (Bagian {part}/{total_parts})",
+        f"👥 *Total:* {total_people} orang",
         "",
     ]
 
     # Create table
-    display_people = people[:max_display]
-    table = format_paid_table(display_people)
-
+    table = format_paid_table(chunk, start_idx=start_idx)
     lines.append(table)
 
-    if len(people) > max_display:
-        lines.append(f"\n... dan {len(people) - max_display} orang lainnya")
-
     # Total nominal
-    lines.append("")
-    lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    lines.append(f"💵 *Total Terbayar:* {format_currency(total_nominal)}")
+    if part == total_parts:
+        lines.append("")
+        lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        lines.append(f"💵 *Total Terbayar:* {format_currency(total_nominal)}")
 
     return "\n".join(lines)
 
 
-def format_paid_table(people: List[Dict[str, Any]]) -> str:
+def format_paid_table(people: List[Dict[str, Any]], start_idx: int = 1) -> str:
     """
-    Format list orang yang sudah bayar dalam bentuk tabel
-
-    Args:
-        people: List orang
+    Format list orang yang sudah bayar dalam bentuk tabel grid
     """
     if not people:
         return "```Tidak ada data```"
 
-    # Columns: No, Nama, Nominal
-    # We omit address here to give more space for names on mobile
-    max_no = max(2, len(str(len(people))))
+    for p in people:
+        p['_alamat_sm'] = get_short_address(p.get('Alamat', '-'))
+
+    max_no = max(2, len(str(start_idx + len(people) - 1)))
     max_nama = max(4, max(len(p['Nama']) for p in people))
+    max_alamat = max(6, max(len(p['_alamat_sm']) for p in people))
     max_nominal = max(7, max(len(format_currency(p['Nominal'])) for p in people))
 
     padding = 2
-    total_width = max_no + max_nama + max_nominal + (padding * 4) + 5
+    total_width = max_no + max_nama + max_alamat + max_nominal + (padding * 6)
 
     lines = []
     lines.append("┌" + "─" * (total_width - 2) + "┐")
@@ -388,6 +377,7 @@ def format_paid_table(people: List[Dict[str, Any]]) -> str:
         "│ " +
         f"{'No':^{max_no}}" + " │ " +
         f"{'Nama':^{max_nama}}" + " │ " +
+        f"{'Alamat':^{max_alamat}}" + " │ " +
         f"{'Nominal':^{max_nominal}}" + " │"
     )
     lines.append(header)
@@ -396,24 +386,28 @@ def format_paid_table(people: List[Dict[str, Any]]) -> str:
         "│ " +
         "─" * max_no + " ┼ " +
         "─" * max_nama + " ┼ " +
+        "─" * max_alamat + " ┼ " +
         "─" * max_nominal + " │"
     )
     lines.append(sep)
 
-    for i, person in enumerate(people, 1):
-        nama = person['Nama'][:max_nama]
+    for i, person in enumerate(people, start_idx):
+        # Escape markdown characters to prevent Telegram parse errors inside the table
+        nama_raw = escape_markdown(person['Nama'])
+        nama = nama_raw[:max_nama]
+        alamat = person['_alamat_sm'][:max_alamat]
         nominal = format_currency(person['Nominal'])
 
         row = (
             "│ " +
             f"{i:^{max_no}}" + " │ " +
             f"{nama:<{max_nama}}" + " │ " +
+            f"{alamat:<{max_alamat}}" + " │ " +
             f"{nominal:>{max_nominal}}" + " │"
         )
         lines.append(row)
 
     lines.append("└" + "─" * (total_width - 2) + "┘")
-
     return "```\n" + "\n".join(lines) + "\n```"
 
 
@@ -446,6 +440,37 @@ def format_multiple_results(results: List[Dict[str, Any]], search_term: str) -> 
 
     lines.append("")
     lines.append("💡 Ketik nama lengkap untuk melihat detail.")
+
+    return "\n".join(lines)
+
+
+def format_client_list(chunk: List[Dict[str, Any]], start_idx: int, total_clients: int, part: int, total_parts: int) -> str:
+    """
+    Format output untuk daftar client dari master data per pesan agar tidak terpotong.
+    
+    Args:
+        chunk: List data client untuk pesan ini
+        start_idx: Indeks awal untuk nomor urut
+        total_clients: Total semua warga
+        part: Pesan urutan ke berapa
+        total_parts: Jumlah total pesan yang akan dikirim
+    """
+    if not chunk:
+        return "❌ Data client kosong atau belum diload."
+
+    lines = [
+        f"👥 *Daftar Semua Client (Bagian {part}/{total_parts})*",
+        f"📊 *Total:* {total_clients} warga",
+        "━━━━━━━━━━━━━━━━━━━━━",
+        ""
+    ]
+
+    for i, person in enumerate(chunk, start_idx):
+        nama = escape_markdown(person['Nama'])
+        # Gunakan get_short_address misal ada
+        alamat = get_short_address(person.get('Alamat', '-'))
+        nominal = format_currency(person.get('Nominal', 0))
+        lines.append(f"`{i:>3}.` *{nama}* ({alamat})\n   💶 {nominal}")
 
     return "\n".join(lines)
 

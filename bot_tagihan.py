@@ -114,6 +114,7 @@ def register_handlers():
     application.add_handler(CommandHandler("cek", handlers_instance.cek_command))
     application.add_handler(CommandHandler("tagihan", handlers_instance.tagihan_command))
     application.add_handler(CommandHandler("paid", handlers_instance.paid_command))
+    application.add_handler(CommandHandler("clients", handlers_instance.client_list_command))
     application.add_handler(CommandHandler("bayar", handlers_instance.bayar_command))
     application.add_handler(CommandHandler("reload", handlers_instance.reload_command))
 
@@ -146,6 +147,7 @@ async def post_init(application: Application):
         BotCommand("cek", "Cek tagihan warga (Nama)"),
         BotCommand("tagihan", "Lihat yang belum bayar"),
         BotCommand("paid", "Lihat yang sudah bayar"),
+        BotCommand("clients", "Daftar semua klien"),
         BotCommand("stats", "Statistik tagihan"),
         BotCommand("help", "Bantuan penggunaan")
     ]
@@ -199,7 +201,15 @@ def main():
 
         # Create Application
         logger.info("Creating Telegram application...")
-        application = Application.builder().token(BOT_TOKEN).post_init(post_init).build()
+        application = (
+            Application.builder()
+            .token(BOT_TOKEN)
+            .post_init(post_init)
+            .read_timeout(30)
+            .write_timeout(30)
+            .connect_timeout(30)
+            .build()
+        )
 
         # Register handlers
         register_handlers()

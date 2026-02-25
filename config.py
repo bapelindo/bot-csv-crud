@@ -33,8 +33,8 @@ MAX_SEARCH_BUTTONS = 10      # Maksimal tombol pilihan warga yang muncul jika na
 RELOAD_DELAY = float(os.getenv("RELOAD_DELAY", "1.0"))
 
 # Display Settings
-MAX_UNPAID_LIST = int(os.getenv("MAX_UNPAID_LIST", "30"))
-MAX_PAID_LIST = int(os.getenv("MAX_PAID_LIST", "30"))
+MAX_UNPAID_LIST = int(os.getenv("MAX_UNPAID_LIST", "100"))
+MAX_PAID_LIST = int(os.getenv("MAX_PAID_LIST", "100"))
 
 # UI & Formatting
 CURRENCY_SYMBOL = os.getenv("CURRENCY_SYMBOL", "Rp")
@@ -69,7 +69,7 @@ def is_admin(user_id: int) -> bool:
 # Batas Tanggal Pembayaran per Dusun/Desa
 DUSUN_DEADLINE = {
     'putat': 15,
-    'gondanglegi': 5,
+    'gondang legi': 5,
     'segaran': 15,
 }
 
